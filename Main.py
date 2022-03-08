@@ -7,6 +7,7 @@ from keras.layers.core import Dense, Activation
 from keras.layers.recurrent import LSTM
 from tensorflow import keras
 
+
 # Create Decision Method
 def Decision(DecList):
     dec = int(-1)
@@ -91,27 +92,26 @@ def TestModel(nModel, test, actual):
     predicted = nModel.predict(test)
     return predicted, actual
 
-def RedrawModel(data):
-    model = CreateModel()
-    print(data)
 
+def DrawModel(model, data, i):
+    nModel, test, actual = ModelHandler(model, data)
+    predicted, actual = TestModel(nModel, test, actual)
+    if CheckAccuracy(model, predicted, actual):
+        DrawModel(model, data, i)
+
+
+def CheckAccuracy(model, predicted, actual):
+    predicted, actual = model.InverseData(predicted), model.InverseData(actual)
+    Accuracy = round(GetAccuracy(predicted, actual), 2)
+    return (Accuracy> 7.5)
 
 def AllDivision(model, data):
     print(data)
     print(range(len(data.columns)))
-    Accuracy = {}
     for i in range(len(data.columns)): #key error of 3
         tdata = data.loc[:, ['Divison {}'.format(i)]]
         tdata = model.ScaleData(tdata)
-        nModel,  test, actual = ModelHandler(model, tdata)
-        predicted, actual =TestModel(nModel, test, actual)
-        predicted, actual = model.InverseData(predicted), model.InverseData(actual)
-        Accuracy["Model {} Accuacy %".format(i)] = round(GetAccuracy(predicted, actual),2)
-    print(Accuracy)
-    Redraw = Decision(["Redraw any models?", "Yes", "No"])
-    if not (Redraw):
-        RedrawModel(Decision(Accuracy))
-
+        DrawModel(model, tdata, i)
 
 def GetAccuracy(predicted, actual):
         result = pd.DataFrame(predicted)
@@ -123,6 +123,7 @@ def GetAccuracy(predicted, actual):
         print("Relative sum", result['sum'])
         ModelAccuracy = (result['sum'].sum()/len(result['sum']))
         return ModelAccuracy
+
 
 Portfolio = GetPortfolioName()
 data = GetSimOrLoad(Portfolio)
