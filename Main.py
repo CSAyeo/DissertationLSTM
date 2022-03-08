@@ -1,7 +1,7 @@
 import pandas as pd
 import DataSimulator
 import Model
-from keras.integration_test.preprocessing_test_utils import preprocessing
+from sklearn import preprocessing
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.layers.recurrent import LSTM
@@ -30,7 +30,7 @@ def GetPortfolioName():
 
 def Load(Portfolio):
     try:
-        data = pd.read_csv('{}.csv'.format(Portfolio))
+        data = pd.read_csv('{}.csv'.format(Portfolio),index_col=0)
     except:
         print("No found from that portfolio, simulating...")
         data = GetSimulated(Portfolio)
@@ -50,6 +50,7 @@ def GetSimulated(Portfolio):
     Divisions = GetDivisions()
     Periods = GetPeriodsToSim()
     data = Simulate(Portfolio, Divisions, Periods)
+    print("Returned data", data)
     return data
 
 
@@ -64,12 +65,12 @@ def GetPeriodsToSim():
 
 
 def Simulate(Portfolio, Divisions, Periods):
-    DataSimulator.Datagen(Portfolio, Divisions, Periods)
+    return DataSimulator.Datagen(Portfolio, Divisions, Periods)
 
 
 # Handle CLI for Model Creation
 def CreateModel():
-    nModel = Model(3, 1, 300, 32, 100, 0.8)  # initalise a model using configured params
+    nModel = Model.model(3, 1, 300, 32, 100, 0.8)  # initalise a model using configured params
     return nModel
 
 
@@ -79,28 +80,34 @@ def SelectDivision(data, Division):
 
 
 def ModelHandler(model, data):
-    data, scaler = model.ScaleData(data)
     x_test, y_test, x_train, y_train = model.SplitData(data)
     nModel = model.train(x_train, y_train)
-    return nModel, scaler, x_test, y_test
+    return nModel, x_test, y_test
 
 
-def TestModel(nModel, scaler, test, actual):
+def TestModel(nModel, test, actual):
     predicted = nModel.predict(test)
-    predicted = scaler.inverse_transform(predicted)
-    return scaler, predicted, actual
+    return predicted, actual
 
 def AllDivision(model, data):
-    for col in data.columns:
-       print(GetAccuracy(TestModel(ModelHandler(model, col))))
+    print(data)
+    print(range(len(data.columns)))
+    for i in range(len(data.columns)): #key error of 3
+        tdata = data.loc[:, ['Divison {}'.format(i)]]
+        tdata = model.ScaleData(tdata)
+        nModel,  test, actual = ModelHandler(model, tdata)
+        predicted, actual =TestModel(nModel, test, actual)
+        predicted, actual = model.InverseData(predicted), model.InverseData(actual)
+        print(GetAccuracy(predicted, actual))
 
-def GetAccuracy(scaler, predicted, actual):
+def GetAccuracy( predicted, actual):
         result = pd.DataFrame(predicted)
         result.columns = ['predict']
-        actual = scaler.inverse_transform(actual)
         result['actual'] = actual
         result['sum'] = (result['predict'] - result['actual']).abs()#get difference between
+        print(result)
         result['sum'] = (result['sum'] / result['actual']) * 100 # get percentage of accuracy
+        print("Relative sum", result['sum'])
         ModelAccuracy = (result['sum'].sum()/len(result['sum']))
         return ModelAccuracy
 

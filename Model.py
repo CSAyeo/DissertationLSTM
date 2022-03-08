@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from tensorflow import keras
-from keras.integration_test.preprocessing_test_utils import preprocessing
+from sklearn import preprocessing
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.layers.recurrent import LSTM
@@ -15,6 +15,7 @@ class model:
         self.batch_size = bs
         self.epochs = ep
         self.percentage = pc
+        self.scaler = preprocessing.StandardScaler()
     # prepare data
 
     def create_model(self):
@@ -36,19 +37,21 @@ class model:
         Y = np.array(y)
         return X, Y
 
-
     def SplitData(self, data):
         split_pos = int(len(data) * self.percentage)
-        print(split_pos)
+        print(f"{split_pos=} {data=}")
         x_train, y_train = self.DatatoArray(data[0:split_pos], self.length_of_sequences)
         x_test, y_test = self.DatatoArray(data[split_pos:], self.length_of_sequences)
         return x_test, y_test, x_train, y_train
 
     def ScaleData(self, data):
-        scaler = preprocessing.StandardScaler()  # create a scaler
-        scaler.fit(data)  # fir the scaler
-        data = scaler.transform(data)  # transform the data
-        return data, scaler
+        self.scaler.fit(data)  # fir the scaler
+        data = self.scaler.transform(data)  # transform the data
+        return data
+
+    def InverseData(self, data):
+        data = self.scaler.inverse_transform(data)  # transform the data
+        return data
 
     def train(self, x_train, y_train):
             model = self.create_model()

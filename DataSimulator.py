@@ -2,8 +2,18 @@ from random import random
 import numpy as np
 import pandas as pd
 
-import CLI
-
+def Decision(DecList):
+    dec = int(-1)
+    q = DecList[0]
+    del DecList[0]
+    while not 0 <= dec < len(DecList):
+        pos = 0
+        print(q)
+        for x in DecList:
+            print(pos, " : ", x)
+            pos += 1
+        dec = int(input())
+    return (dec)
 
 def Datagen(Portfolio, Divisions,  Periods):
     DataList = {}
@@ -23,8 +33,9 @@ def Datagen(Portfolio, Divisions,  Periods):
     df = pd.DataFrame(DataList, index=YearRange)
     print(df)
     df.index.name = 'Date'
-    if SaveDataDecision():
+    if not SaveDataDecision():
         SaveData(df, Portfolio)
+        print(df)
     return df
 
 def GetTrend(Divisions):
@@ -42,7 +53,7 @@ def GetStart(Division):
     return Start
 
 def SaveDataDecision():
-    save = CLI.Decision(["Save data?", "Yes", "No"])
+    save = Decision(["Save data?", "Yes", "No"])
     return save
 
 def SaveData(Data, i):
