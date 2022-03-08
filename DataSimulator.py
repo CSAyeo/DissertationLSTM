@@ -58,5 +58,5 @@ def SaveDataDecision():
 
 def SaveData(Data, i):
     print("Saving data...")
-    Data.to_csv("{}.csv".format(i))
+    Data.to_csv("Data\{}.csv".format(i))
 

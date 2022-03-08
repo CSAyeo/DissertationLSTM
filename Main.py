@@ -10,8 +10,10 @@ from tensorflow import keras
 # Create Decision Method
 def Decision(DecList):
     dec = int(-1)
+    print(DecList)
     q = DecList[0]
     del DecList[0]
+    print(DecList)
     while not 0 <= dec < len(DecList):
         pos = 0
         print(q)
@@ -30,7 +32,7 @@ def GetPortfolioName():
 
 def Load(Portfolio):
     try:
-        data = pd.read_csv('{}.csv'.format(Portfolio),index_col=0)
+        data = pd.read_csv('Data\{}.csv'.format(Portfolio),index_col=0)
     except:
         print("No found from that portfolio, simulating...")
         data = GetSimulated(Portfolio)
@@ -89,18 +91,29 @@ def TestModel(nModel, test, actual):
     predicted = nModel.predict(test)
     return predicted, actual
 
+def RedrawModel(data):
+    model = CreateModel()
+    print(data)
+
+
 def AllDivision(model, data):
     print(data)
     print(range(len(data.columns)))
+    Accuracy = {}
     for i in range(len(data.columns)): #key error of 3
         tdata = data.loc[:, ['Divison {}'.format(i)]]
         tdata = model.ScaleData(tdata)
         nModel,  test, actual = ModelHandler(model, tdata)
         predicted, actual =TestModel(nModel, test, actual)
         predicted, actual = model.InverseData(predicted), model.InverseData(actual)
-        print(GetAccuracy(predicted, actual))
+        Accuracy["Model {} Accuacy %".format(i)] = round(GetAccuracy(predicted, actual),2)
+    print(Accuracy)
+    Redraw = Decision(["Redraw any models?", "Yes", "No"])
+    if not (Redraw):
+        RedrawModel(Decision(Accuracy))
 
-def GetAccuracy( predicted, actual):
+
+def GetAccuracy(predicted, actual):
         result = pd.DataFrame(predicted)
         result.columns = ['predict']
         result['actual'] = actual
