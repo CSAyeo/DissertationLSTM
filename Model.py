@@ -39,7 +39,6 @@ class model:
 
     def SplitData(self, data):
         split_pos = int(len(data) * self.percentage)
-        print(f"{split_pos=} {data=}")
         x_train, y_train = self.DatatoArray(data[0:split_pos], self.length_of_sequences)
         x_test, y_test = self.DatatoArray(data[split_pos:], self.length_of_sequences)
         return x_test, y_test, x_train, y_train
