@@ -20,20 +20,15 @@ def Datagen(Portfolio, Divisions,  Periods):
     YearRange = pd.date_range(start='1/1/2000', periods=int(Periods), freq='A')
     for i in range(int(Divisions)):
         Startlist = []
-        Endlist = []
-        End = int(GetStart(i))
+        Start = int(GetStart(i))
         Trend = float(GetTrend(i))
         print((0.995 + Trend), (1.005 + (Trend)))
         for Year in range(int(Periods)):
-            Start = End * np.random.uniform((0.995 + Trend), (1.005 + (Trend)))
-            End = Start * np.random.uniform((0.995), (1.005))
+            Start = Start * np.random.uniform((0.995 + Trend), (1.005 + (Trend)))
             Start = round(Start)
-            End = round(End)
             Startlist.append(Start)
-            Endlist.append(End)
         print(Startlist)
-        DataList['Divison {} Start'.format(i)] =Startlist
-        DataList['Divison {} End'.format(i)] =Endlist
+        DataList['Divison {}'.format(i)] =Startlist
     print(DataList)
     df = pd.DataFrame(DataList, index=YearRange)
     print(df)
