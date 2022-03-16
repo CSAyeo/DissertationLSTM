@@ -150,7 +150,12 @@ def DisplayPie():
 def DisplayLine():
     print("Line")
 
+def Vers():
+    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 0.78")
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+Vers()
 Portfolio = GetPortfolioName()
 data = GetSimOrLoad(Portfolio)
 YearsToPredict = GetPredictYears()
