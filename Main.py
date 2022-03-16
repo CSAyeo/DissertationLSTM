@@ -30,6 +30,7 @@ def GetPortfolioName():
     return PN
 
 
+
 # Attempt to load the data specified by the user, if not found begin simulating instead
 def Load(Portfolio):
     try:
@@ -69,11 +70,31 @@ def GetPeriodsToSim():
 def Simulate(Portfolio, Divisions, Periods):
     return DataSimulator.Datagen(Portfolio, Divisions, Periods)
 
+def GetModelName():
+    MN = input("Use Model:")
+    return MN
 
 # Handle CLI for Model Creation
-def CreateModel():
-    nModel = Model.model(1, 1, 300, 32, 100, 0.8)  # initalise a model using configured params
-    return nModel
+def InitModel():
+    mn = GetModelName()
+    nModel = Model.model(3, 1, 300, 32, 100, 0.8, mn)  # initalise a model using configured params
+    return nModel, mn
+
+
+def SaveModel(model, mn):
+    model.save('Model\{}.h5'.format(mn))
+
+
+def SaveModelDec(model, mn):
+    Save = Decision(["Save Model?", "Yes", "No"])
+    if not Save:
+        SaveModel(model, mn)
+
+
+def SavePredictions():
+    Save = Decision(["Save Predictions?", "Yes", "No"])
+    if not Save:
+        SaveModel()
 
 
 def SelectDivision(data, Division):
@@ -84,6 +105,7 @@ def SelectDivision(data, Division):
 def ModelHandler(model, data):
     x_test, y_test, x_train, y_train = model.SplitData(data)
     nModel = model.train(x_train, y_train)
+    print(f"{y_test=}")
     return nModel, x_test, y_test
 
 
@@ -98,7 +120,7 @@ def DrawModel(model, data, i):
     predicted, actual = model.InverseData(predicted), model.InverseData(actual)
     if CheckAccuracy(model, predicted, actual):
         DrawModel(model, data, i)
-    return predicted
+    return nModel, predicted
 
 
 def CheckAccuracy(model, predicted, actual):
@@ -109,21 +131,21 @@ def CheckAccuracy(model, predicted, actual):
     return (Accuracy > 3.5)
 
 
-def AllDivision(model, data, years):
+def AllDivision(ModelObj,  data, years):
     results = []
     for i in range(len(data.columns)):  # key error of 3
         tdata = data.loc[:, ['Divison {}'.format(i)]]
-        tdata = model.ScaleData(tdata)
-        results.append(DrawModel(model, tdata, i))
+        tdata = ModelObj.ScaleData(tdata)
+        model, res = DrawModel(ModelObj, tdata, i)
+        results.append(res)
+    return model, results
 
-    return results
-
-def GetPredictYears():
-    YearsToPredict = int(input("How many years to predict"))
-    if (YearsToPredict > 261):
-        GetPredictYears()
+def GetVisYears(max):
+    YearsToVis= int(input("How many years to visualise"))
+    if (YearsToVis > max):
+        GetVisYears()
     else:
-        return 1
+        return YearsToVis
 
 def GetAccuracy(predicted, actual):
     result = pd.DataFrame(predicted)
@@ -144,23 +166,23 @@ def AddPredict(data, years):
         data.loc[AddYears[i]] = data.iloc[-1]
     return data
 
-def DisplayPie():
-    print("Pie")
-
-def DisplayLine():
-    print("Line")
-
 def Vers():
     print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 0.78")
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 Vers()
+
+
+ModelObj, mn = InitModel()
 Portfolio = GetPortfolioName()
 data = GetSimOrLoad(Portfolio)
-YearsToPredict = GetPredictYears()
+YearsToVis = GetVisYears(len(data.index))
+YearsToPredict=2
 data = AddPredict(data, YearsToPredict)
-model = CreateModel()
-results = AllDivision(model, data, YearsToPredict)
-print(results)
-DataVisualiser.vis(results)
+model, results = AllDivision(ModelObj, data, YearsToPredict)
+print(f"{results=} {data=}")
+DataVisualiser.vis(results, YearsToVis)
+SaveModelDec(model, mn)
+print(f"{results=} {data=}")
+DataSimulator.SaveDataDecision(data, Portfolio)

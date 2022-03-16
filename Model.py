@@ -8,7 +8,7 @@ from keras.layers.recurrent import LSTM
 
 
 class model:
-    def __init__(self, ls, on, hn, bs, ep, pc):
+    def __init__(self, ls, on, hn, bs, ep, pc, mn):
         self.length_of_sequences = ls
         self.in_out_neurons = on
         self.hidden_neurons = hn
@@ -16,6 +16,7 @@ class model:
         self.epochs = ep
         self.percentage = pc
         self.scaler = preprocessing.StandardScaler()
+        self.modelName = mn
     # prepare data
 
     def create_model(self):
@@ -48,12 +49,23 @@ class model:
         data = self.scaler.transform(data)  # transform the data
         return data
 
+    def GetName(self):
+        return self.modelName
+
     def InverseData(self, data):
         data = self.scaler.inverse_transform(data)  # transform the data
         return data
 
     def train(self, x_train, y_train):
-            model = self.create_model()
+            model = self.LoadModel()
             model.fit(x_train, y_train, self.batch_size, self.epochs)
             return model
+
+    def LoadModel(self):
+        try:
+            model = keras.models.load_model('Model\{}.h5'.format(self.modelName))
+        except:
+            print("Error loading model, generating...")
+            model = self.create_model()
+        return model
 

@@ -33,9 +33,7 @@ def Datagen(Portfolio, Divisions,  Periods):
     df = pd.DataFrame(DataList, index=YearRange)
     print(df)
     df.index.name = 'Date'
-    if not SaveDataDecision():
-        SaveData(df, Portfolio)
-        print(df)
+    SaveDataDecision(df, Portfolio)
     return df
 
 def GetTrend(Divisions):
@@ -52,9 +50,11 @@ def GetStart(Division):
     Start = input("Please specify starting value for division {} (Recommended 500)".format(Division))
     return Start
 
-def SaveDataDecision():
+def SaveDataDecision(df, Portfolio):
     save = Decision(["Save data?", "Yes", "No"])
-    return save
+    if not save:
+        SaveData(df, Portfolio)
+        print(df)
 
 def SaveData(Data, i):
     print("Saving data...")
