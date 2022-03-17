@@ -10,6 +10,8 @@ from tensorflow import keras
 
 
 # Create Decision Method
+#@param DecList List with question in position 0, followed by answers
+#Out, decision of user
 def Decision(DecList):
     dec = int(-1)
     q = DecList[0]
@@ -25,6 +27,7 @@ def Decision(DecList):
 
 
 # Handle CLI for Data Handling & Simulation
+#out; Portfolio Name as string
 def GetPortfolioName():
     PN = input("What portfolio would you like to assess?")
     return PN
@@ -32,6 +35,7 @@ def GetPortfolioName():
 
 
 # Attempt to load the data specified by the user, if not found begin simulating instead
+#@param Portfolio, name of the portfolio to load
 def Load(Portfolio):
     try:
         data = pd.read_csv('Data\{}.csv'.format(Portfolio), index_col=0)
@@ -40,7 +44,8 @@ def Load(Portfolio):
         data = GetSimulated(Portfolio)
     return data
 
-
+#Let the user decide whether to load or simulate the data
+#@param Portfolio name
 def GetSimOrLoad(Portfolio):
     SimOrLoad = Decision(["Generate or Simulate?", "Simulate", "Load"])
     if SimOrLoad:
@@ -49,11 +54,12 @@ def GetSimOrLoad(Portfolio):
         data = GetSimulated(Portfolio)
     return data
 
-
+#Call the data Simulate funciton
+#@params Portfolio name
 def GetSimulated(Portfolio):
     Divisions = GetDivisions()
     Periods = GetPeriodsToSim()
-    data = Simulate(Portfolio, Divisions, Periods)
+    data = DataSimulator.Datagen(Portfolio, Divisions, Periods)
     return data
 
 
@@ -67,8 +73,7 @@ def GetPeriodsToSim():
     return PTS
 
 
-def Simulate(Portfolio, Divisions, Periods):
-    return DataSimulator.Datagen(Portfolio, Divisions, Periods)
+
 
 def GetModelName():
     MN = input("Use Model:")
@@ -77,7 +82,7 @@ def GetModelName():
 # Handle CLI for Model Creation
 def InitModel():
     mn = GetModelName()
-    nModel = Model.model(3, 1, 300, 32, 100, 0.8, mn)  # initalise a model using configured params
+    nModel = Model.model(5, 1, 300, 32, 100, 0.7, mn)  # initalise a model using configured params
     return nModel, mn
 
 
@@ -103,22 +108,18 @@ def SelectDivision(data, Division):
 
 
 def ModelHandler(model, data):
-    x_test, y_test, x_train, y_train = model.SplitData(data)
-    nModel = model.train(x_train, y_train)
+    nModel,x_test, y_test  = model.SplitData(data)
     print(f"{y_test=}")
     return nModel, x_test, y_test
 
 
-def TestModel(nModel, test, actual):
-    predicted = nModel.predict(test)
-    return predicted, actual
-
 
 def DrawModel(model, data, i):
-    nModel, test, actual = ModelHandler(model, data)
-    predicted, actual = TestModel(nModel, test, actual)
-    predicted, actual = model.InverseData(predicted), model.InverseData(actual)
-    if CheckAccuracy(model, predicted, actual):
+    nModel, xtest, ytest = ModelHandler(model, data)
+    print(f"{ytest=} {xtest=}")
+    predicted = nModel.predict(xtest)
+    predicted, y_test = model.InverseData(predicted), model.InverseData(actual)
+    if CheckAccuracy(model, predicted, y_test):
         DrawModel(model, data, i)
     return nModel, predicted
 

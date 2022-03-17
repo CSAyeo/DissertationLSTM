@@ -22,11 +22,16 @@ def Datagen(Portfolio, Divisions,  Periods):
         Startlist = []
         Start = int(GetStart(i))
         Trend = float(GetTrend(i))
-        print((0.995 + Trend), (1.005 + (Trend)))
+
+
+
         for Year in range(int(Periods)):
             Start = Start * np.random.uniform((0.995 + Trend), (1.005 + (Trend)))
             Start = round(Start)
             Startlist.append(Start)
+
+
+
         print(Startlist)
         DataList['Divison {}'.format(i)] =Startlist
     print(DataList)

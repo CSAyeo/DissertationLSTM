@@ -14,6 +14,7 @@ class model:
         self.hidden_neurons = hn
         self.batch_size = bs
         self.epochs = ep
+
         self.percentage = pc
         self.scaler = preprocessing.StandardScaler()
         self.modelName = mn
@@ -22,8 +23,7 @@ class model:
     def create_model(self):
         #creates the model using set params, evaluated for efficiency
         Model = Sequential()
-        Model.add(LSTM(self.hidden_neurons, batch_input_shape=(None, self.length_of_sequences, self.in_out_neurons),
-                       return_sequences=False))
+        Model.add(LSTM(self.hidden_neurons, batch_input_shape=(None, self.length_of_sequences, self.in_out_neurons),return_sequences=False))
         Model.add(Dense(self.in_out_neurons))
         Model.add(Activation("linear"))
         Model.compile(loss="mape", optimizer="adam")
@@ -42,7 +42,9 @@ class model:
         split_pos = int(len(data) * self.percentage)
         x_train, y_train = self.DatatoArray(data[0:split_pos], self.length_of_sequences)
         x_test, y_test = self.DatatoArray(data[split_pos:], self.length_of_sequences)
-        return x_test, y_test, x_train, y_train
+        model = self.LoadModel()
+        model.fit(x_train, y_train, self.batch_size, self.epochs)
+        return model, x_test, y_test
 
     def ScaleData(self, data):
         self.scaler.fit(data)  # fir the scaler
@@ -53,12 +55,12 @@ class model:
         return self.modelName
 
     def InverseData(self, data):
+        print(f"{data=}")
         data = self.scaler.inverse_transform(data)  # transform the data
         return data
 
     def train(self, x_train, y_train):
-            model = self.LoadModel()
-            model.fit(x_train, y_train, self.batch_size, self.epochs)
+
             return model
 
     def LoadModel(self):
