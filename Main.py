@@ -105,7 +105,6 @@ def SelectDivision(data, Division):
 def ModelHandler(model, data):
     x_test, y_test, x_train, y_train = model.SplitData(data)
     nModel = model.train(x_train, y_train)
-    print(f"{y_test=}")
     return nModel, x_test, y_test
 
 
@@ -126,7 +125,6 @@ def DrawModel(model, data, i):
 def CheckAccuracy(model, predicted, actual):
     final = predicted[0:-5]
     test = predicted[-5:]
-    print(f"{final=} {test=}")
     Accuracy = round(GetAccuracy(predicted, actual), 2)
     return (Accuracy > 3.5)
 
@@ -154,6 +152,7 @@ def GetAccuracy(predicted, actual):
     result['sum'] = (result['predict'] - result['actual']).abs()  # get difference between
     result['sum'] = (result['sum'] / result['actual']) * 100  # get percentage of accuracy
     ModelAccuracy = (result['sum'].sum() / len(result['sum']))
+    print(ModelAccuracy)
     return ModelAccuracy
 
 def AddPredict(data, years):
@@ -165,7 +164,7 @@ def AddPredict(data, years):
     return data
 
 def Vers():
-    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.0")
+    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.01")
 
 
 import os
@@ -180,6 +179,6 @@ YearsToVis = GetVisYears(len(data.index))
 YearsToPredict=2
 data = AddPredict(data, YearsToPredict)
 model, results = AllDivision(ModelObj, data, YearsToPredict)
-DataVisualiser.vis(data, results, YearsToVis)
+DataVisualiser.vis(data, results, YearsToVis, Portfolio)
 SaveModelDec(model, mn)
 DataSimulator.SaveDataDecision(data, Portfolio)

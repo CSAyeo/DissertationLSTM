@@ -3,14 +3,14 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-def vis(data, res, disp):
+def vis(data, res, disp, port):
     fig, axs = plt.subplots(2, 1, constrained_layout=True)
     c = 0
     for x in res:
         axs[0].plot(range(len(x)),x, label='division {}'.format(c))
         axs[0].legend()
         c+=1
-    axs[0].set_title('{}'.format(disp))
+    axs[0].set_title('{}'.format(port))
     axs[0].set_xlabel('Time-Period')
     axs[0].set_ylabel('Value')
     predicted = [sublist[-1].tolist() for sublist in res]
