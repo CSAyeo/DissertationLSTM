@@ -7,7 +7,7 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.layers.recurrent import LSTM
 from tensorflow import keras
-
+from itertools import chain
 
 # Create Decision Method
 def Decision(DecList):
@@ -152,9 +152,7 @@ def GetAccuracy(predicted, actual):
     result.columns = ['predict']
     result['actual'] = actual
     result['sum'] = (result['predict'] - result['actual']).abs()  # get difference between
-    print(result)
     result['sum'] = (result['sum'] / result['actual']) * 100  # get percentage of accuracy
-    print("Relative sum", result['sum'])
     ModelAccuracy = (result['sum'].sum() / len(result['sum']))
     return ModelAccuracy
 
@@ -169,6 +167,7 @@ def AddPredict(data, years):
 def Vers():
     print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 0.78")
 
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 Vers()
@@ -181,8 +180,6 @@ YearsToVis = GetVisYears(len(data.index))
 YearsToPredict=2
 data = AddPredict(data, YearsToPredict)
 model, results = AllDivision(ModelObj, data, YearsToPredict)
-print(f"{results=} {data=}")
-DataVisualiser.vis(results, YearsToVis)
+DataVisualiser.vis(data, results, YearsToVis)
 SaveModelDec(model, mn)
-print(f"{results=} {data=}")
 DataSimulator.SaveDataDecision(data, Portfolio)
