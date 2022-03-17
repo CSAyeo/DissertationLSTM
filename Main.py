@@ -165,7 +165,7 @@ def AddPredict(data, years):
     return data
 
 def Vers():
-    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 0.78")
+    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.0")
 
 
 import os
