@@ -164,7 +164,7 @@ def AddPredict(data, years):
     return data
 
 def Vers():
-    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.02")
+    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.03")
 
 
 import os
@@ -182,4 +182,12 @@ model, results, acc = AllDivision(ModelObj, data, YearsToPredict)
 print("--- %.2f seconds ---" % (time.time() - start_time))
 DataVisualiser.vis(data, results, YearsToVis, Portfolio)
 SaveModelDec(model, mn)
+print(f"{results=}")
+pred = []
+for x in results:
+    x = x.tolist()
+    pred.append(x[-1][0])
+print(pred)
+data.iloc[-1] = pred
+print(data)
 DataSimulator.SaveDataDecision(data, Portfolio)
