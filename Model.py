@@ -29,6 +29,23 @@ class model:
         Model.compile(loss="mape", optimizer="adam")
         return Model
 
+
+    # Param test code
+    # def create_model(InitalTrainingSet, X_Train, Y_Train, DropoutRate, NodeCount, LayerCount):
+    #     Model = Sequential()
+    #     # Adding the first LSTM layer and some Dropout regularisation
+    #     Model.add(LSTM(units=50, return_sequences=True, input_shape=(X_Train.shape[1], 1)))
+    #     Model.add(Dropout(0.2))
+    #     print(NodeCount)
+    #     for x in range(LayerCount):
+    #         Model.add(LSTM(units=NodeCount, return_sequences=True))
+    #         Model.add(Dropout(DropoutRate))
+    #     Model.add(LSTM(units=NodeCount))
+    #     Model.add(Dropout(DropoutRate))
+    #     Model.add(Dense(units=1))
+    #     # Compiling the RNN
+    #     Model.compile(optimizer='adam', loss='mean_squared_error')
+
     def DatatoArray(self, data, n_prev):
         x, y = [], []
         for i in range(len(data) - n_prev):
@@ -59,6 +76,7 @@ class model:
     def train(self, x_train, y_train):
             model = self.LoadModel()
             model.fit(x_train, y_train, self.batch_size, self.epochs)
+            model.save('Model\{}.h5'.format(self.modelName))
             return model
 
     def LoadModel(self):

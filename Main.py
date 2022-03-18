@@ -8,6 +8,7 @@ from keras.layers.core import Dense, Activation
 from keras.layers.recurrent import LSTM
 from tensorflow import keras
 from itertools import chain
+import time
 
 # Create Decision Method
 def Decision(DecList):
@@ -117,16 +118,15 @@ def DrawModel(model, data, i):
     nModel, test, actual = ModelHandler(model, data)
     predicted, actual = TestModel(nModel, test, actual)
     predicted, actual = model.InverseData(predicted), model.InverseData(actual)
-    if CheckAccuracy(model, predicted, actual):
+    acc = CheckAccuracy(model, predicted, actual)
+    if acc > 3.5:
         DrawModel(model, data, i)
-    return nModel, predicted
+    return nModel, predicted, acc
 
 
 def CheckAccuracy(model, predicted, actual):
-    final = predicted[0:-5]
-    test = predicted[-5:]
     Accuracy = round(GetAccuracy(predicted, actual), 2)
-    return (Accuracy > 3.5)
+    return Accuracy
 
 
 def AllDivision(ModelObj,  data, years):
@@ -134,9 +134,9 @@ def AllDivision(ModelObj,  data, years):
     for i in range(len(data.columns)):  # key error of 3
         tdata = data.loc[:, ['Divison {}'.format(i)]]
         tdata = ModelObj.ScaleData(tdata)
-        model, res = DrawModel(ModelObj, tdata, i)
+        model, res, acc = DrawModel(ModelObj, tdata, i)
         results.append(res)
-    return model, results
+    return model, results, acc
 
 def GetVisYears(max):
     YearsToVis= int(input("How many years to visualise"))
@@ -152,7 +152,7 @@ def GetAccuracy(predicted, actual):
     result['sum'] = (result['predict'] - result['actual']).abs()  # get difference between
     result['sum'] = (result['sum'] / result['actual']) * 100  # get percentage of accuracy
     ModelAccuracy = (result['sum'].sum() / len(result['sum']))
-    print(ModelAccuracy)
+    print(f"{ModelAccuracy=}")
     return ModelAccuracy
 
 def AddPredict(data, years):
@@ -164,21 +164,22 @@ def AddPredict(data, years):
     return data
 
 def Vers():
-    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.01")
+    print("Christian Scavetta's Portfolio Guardrail Perdiction NN Vers 1.02")
 
 
 import os
+start_time = time.time()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 Vers()
-
-
+acclist = []
 ModelObj, mn = InitModel()
 Portfolio = GetPortfolioName()
 data = GetSimOrLoad(Portfolio)
 YearsToVis = GetVisYears(len(data.index))
 YearsToPredict=2
 data = AddPredict(data, YearsToPredict)
-model, results = AllDivision(ModelObj, data, YearsToPredict)
+model, results, acc = AllDivision(ModelObj, data, YearsToPredict)
+print("--- %.2f seconds ---" % (time.time() - start_time))
 DataVisualiser.vis(data, results, YearsToVis, Portfolio)
 SaveModelDec(model, mn)
 DataSimulator.SaveDataDecision(data, Portfolio)
